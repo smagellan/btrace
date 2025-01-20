@@ -98,6 +98,14 @@ public class BTraceUtils {
     Threads.jstack(2, -1);
   }
 
+  /** Prints the java stack trace of the given thread.
+   *
+   * @param target the thread for which the stracktrace is created
+   */
+  public static void jstack(Thread dest) {
+    Threads.jstack(dest, 2, -1);
+  }
+
   /**
    * Prints the java stack trace of the current thread. But, at most given number of frames.
    *
@@ -105,6 +113,16 @@ public class BTraceUtils {
    */
   public static void jstack(int numFrames) {
     Threads.jstack(2, numFrames);
+  }
+
+  /**
+   * Prints the java stack trace of a given thread. But, at most given number of frames.
+   *
+   * @param the thread for which the stracktrace is created
+   * @param numFrames number of frames to be printed. When this is negative all frames are printed.
+   */
+  public static void jstack(Thread dest, int numFrames) {
+    Threads.jstack(dest, 2, numFrames);
   }
 
   /** Prints Java stack traces of all the Java threads. */
@@ -131,6 +149,16 @@ public class BTraceUtils {
   }
 
   /**
+   * Returns the stack trace of a given thread as a String.
+   *
+   * @param the thread for which the stracktrace is created
+   * @return the stack trace as a String.
+   */
+  public static String jstackStr(Thread dest) {
+    return Threads.jstackStr(dest, 2, -1);
+  }
+
+  /**
    * Returns the stack trace of the current thread as a String but includes at most the given number
    * of frames.
    *
@@ -140,6 +168,19 @@ public class BTraceUtils {
    */
   public static String jstackStr(int numFrames) {
     return Threads.jstackStr(2, numFrames);
+  }
+
+  /**
+   * Returns the stack trace of a given thread as a String but includes at most the given number
+   * of frames.
+   *
+   * @param the thread for which the stracktrace is created
+   * @param numFrames number of frames to be included. When this is negative all frames are
+   *     included.
+   * @return the stack trace as a String.
+   */
+  public static String jstackStr(Thread dest, int numFrames) {
+    return Threads.jstackStr(dest, 2, numFrames);
   }
 
   /**
@@ -3169,7 +3210,7 @@ public class BTraceUtils {
 
     /** Prints the java stack trace of the current thread. */
     public static void jstack() {
-      jstack(1, -1);
+      jstack(Thread.currentThread(), 1, -1);
     }
 
     /**
@@ -3180,12 +3221,37 @@ public class BTraceUtils {
      */
     public static void jstack(int numFrames) {
       // passing '5' to skip our own frames to generate stack trace
-      jstack(1, numFrames);
+      jstack(Thread.currentThread(), 1, numFrames);
+    }
+
+    /** Prints the java stack trace of a given thread.
+     *
+     * @param target the thread for which the stracktrace is created
+     */
+    public static void jstack(Thread target) {
+      jstack(target, 1, -1);
+    }
+
+    /**
+     * Prints the java stack trace of a given thread. But, atmost given number of frames.
+     *
+     * @param target the thread for which the stracktrace is created
+     * @param numFrames number of frames to be printed. When this is negative all frames are
+     *     printed.
+     */
+    public static void jstack(Thread target, int numFrames) {
+      jstack(target, 1, numFrames);
     }
 
     private static void jstack(int strip, int numFrames) {
       if (numFrames == 0) return;
       StackTraceElement[] st = Thread.currentThread().getStackTrace();
+      BTraceRuntime.stackTrace(st, strip + 2, numFrames);
+    }
+
+    private static void jstack(Thread target, int strip, int numFrames) {
+      if (numFrames == 0) return;
+      StackTraceElement[] st = target.getStackTrace();
       BTraceRuntime.stackTrace(st, strip + 2, numFrames);
     }
 
@@ -3214,7 +3280,7 @@ public class BTraceUtils {
      * @return the stack trace as a String.
      */
     public static String jstackStr() {
-      return jstackStr(1, -1);
+      return jstackStr(Thread.currentThread(), 1, -1);
     }
 
     /**
@@ -3226,17 +3292,44 @@ public class BTraceUtils {
      * @return the stack trace as a String.
      */
     public static String jstackStr(int numFrames) {
-      if (numFrames == 0) {
-        return "";
-      }
-      return jstackStr(1, numFrames);
+      return jstackStr(Thread.currentThread(), 1, numFrames);
+    }
+
+    /**
+     * Returns the stack trace of a given thread as a String but includes atmost the given
+     * number of frames.
+     *
+     * @param the thread for which the stracktrace is created
+     * @param numFrames number of frames to be included. When this is negative all frames are
+     *     included.
+     * @return the stack trace as a String.
+     */
+    public static String jstackStr(Thread target) {
+      return jstackStr(Thread.currentThread(), 1, -1);
+    }
+
+    /**
+     * Returns the stack trace of a given thread as a String but includes atmost the given
+     * number of frames.
+     *
+     * @param the thread for which the stracktrace is created
+     * @param numFrames number of frames to be included. When this is negative all frames are
+     *     included.
+     * @return the stack trace as a String.
+     */
+    public static String jstackStr(Thread target, int numFrames) {
+      return jstackStr(target, 1, numFrames);
     }
 
     private static String jstackStr(int strip, int numFrames) {
+      return jstackStr(Thread.currentThread(), strip + 2, numFrames);
+    }
+
+    private static String jstackStr(Thread target, int strip, int numFrames) {
       if (numFrames == 0) {
         return "";
       }
-      StackTraceElement[] st = Thread.currentThread().getStackTrace();
+      StackTraceElement[] st = target.getStackTrace();
       return BTraceRuntime.stackTraceStr(st, strip + 2, numFrames);
     }
 
